@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Lead Capture Chatbot Demo — Laiba Aftab</title>
+<meta name="description" content="Live demo: AI-powered lead capture chatbot for real estate & clinic websites, built by Laiba Aftab.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0f1c; --surface:#101c30; --surface-alt:#152238; --text:#eef1f6;
+    --text-dim:#8b96ac; --text-faint:#5c6780; --gold:#d4a24c; --teal:#4fd1c5;
+    --teal-soft:rgba(79,209,197,.12); --border:rgba(255,255,255,.08); --border-strong:rgba(255,255,255,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px 16px}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(ellipse 900px 500px at 85% -5%,rgba(79,209,197,.10),transparent 60%),radial-gradient(ellipse 700px 500px at 5% 15%,rgba(212,162,76,.08),transparent 60%)}
+  .wrap{position:relative;z-index:1;width:100%;max-width:460px}
+  .badge{display:inline-flex;gap:8px;background:var(--teal-soft);color:var(--teal);border:1px solid rgba(79,209,197,.25);border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:600;margin-bottom:14px}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:22px;margin-bottom:6px}
+  .sub{color:var(--text-dim);font-size:14px;margin-bottom:16px}
+  .modes{display:flex;gap:8px;margin-bottom:14px}
+  .mode{flex:1;background:var(--surface);border:1px solid var(--border-strong);color:var(--text-dim);padding:9px;border-radius:10px;font:inherit;font-size:13.5px;cursor:pointer}
+  .mode[aria-pressed="true"]{border-color:var(--teal);color:var(--teal);background:var(--teal-soft)}
+  .card{background:var(--surface);border:1px solid var(--border-strong);border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+  .head{display:flex;align-items:center;gap:12px;padding:16px 18px;background:var(--surface-alt);border-bottom:1px solid var(--border)}
+  .avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--gold));display:flex;align-items:center;justify-content:center;font-size:18px}
+  .hname{font-weight:600;font-size:14.5px}
+  .hstatus{font-size:12px;color:var(--teal);display:flex;align-items:center;gap:5px}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 6px var(--teal)}
+  .leads{margin-left:auto;font-size:12px;color:var(--gold);border:1px solid rgba(212,162,76,.35);border-radius:999px;padding:4px 10px;background:transparent;cursor:pointer;font-family:inherit}
+  .body{height:420px;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+  .body::-webkit-scrollbar{width:5px}.body::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:10px}
+  .msg{max-width:82%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5;animation:pop .25s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .msg.bot{background:var(--surface-alt);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
+  .msg.user{background:linear-gradient(135deg,rgba(79,209,197,.18),rgba(212,162,76,.12));border:1px solid rgba(79,209,197,.25);align-self:flex-end;border-bottom-right-radius:4px}
+  .msg.lead{border-color:rgba(212,162,76,.45)}
+  .qr{display:flex;flex-wrap:wrap;gap:8px}
+  .qr button{background:var(--surface-alt);border:1px solid var(--border-strong);color:var(--text);font:inherit;font-size:12.5px;padding:7px 12px;border-radius:999px;cursor:pointer}
+  .qr button:hover{border-color:var(--teal);color:var(--teal)}
+  .typing{display:flex;gap:4px;padding:12px 14px;align-self:flex-start}
+  .typing span{width:6px;height:6px;border-radius:50%;background:var(--text-faint);animation:blink 1.2s infinite ease-in-out}
+  .typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+  @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+  .row{display:flex;gap:8px;padding:14px;border-top:1px solid var(--border);background:var(--surface-alt)}
+  .row input{flex:1;background:var(--bg);border:1px solid var(--border-strong);color:var(--text);border-radius:10px;padding:10px 14px;font:inherit;font-size:14px;outline:none}
+  .row input:focus,.mode:focus-visible,.qr button:focus-visible,.leads:focus-visible,.send:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .send{background:linear-gradient(135deg,var(--teal),#3bb8ac);border:none;color:#06231f;width:40px;height:40px;border-radius:10px;cursor:pointer;font-size:16px;flex-shrink:0}
+  .note{text-align:center;color:var(--text-faint);font-size:12px;margin-top:16px}
+  .note a{color:var(--teal);text-decoration:none}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="badge">● Live Demo</div>
+  <h1>AI Lead Capture Chatbot</h1>
+  <p class="sub">A 24/7 assistant for real estate & clinic websites. It answers questions and collects leads automatically.</p>
+
+  <div class="modes" role="group" aria-label="Demo type">
+    <button class="mode" id="modeRE" aria-pressed="true">🏠 Real estate</button>
+    <button class="mode" id="modeCL" aria-pressed="false">🩺 Clinic</button>
+  </div>
+
+  <div class="card">
+    <div class="head">
+      <div class="avatar" id="avatar">🤖</div>
+      <div>
+        <div class="hname" id="botName">Property Assistant</div>
+        <div class="hstatus"><span class="dot"></span> Online now</div>
+      </div>
+      <button class="leads" id="leadsBtn" title="Show captured leads">Leads: 0</button>
+    </div>
+    <div class="body" id="chatBody" aria-live="polite"></div>
+    <div class="row">
+      <input type="text" id="chatInput" placeholder="Type a message…" autocomplete="off" aria-label="Message">
+      <button class="send" id="chatSend" aria-label="Send">➤</button>
+    </div>
+  </div>
+
+  <p class="note">Built with HTML, CSS &amp; JS by <a href="about.html">Laiba Aftab</a> — Next.js Developer &amp; AI Automation Specialist</p>
+</div>
+
+<script>
+const BOTS = {
+  re: {
+    name: 'Property Assistant', icon: '🤖',
+    greeting: "👋 Hi! I'm here to help with property listings, bookings, or pricing. What are you looking for today?",
+    quick: [['🏠 Available properties','Show available properties'],['💰 Pricing','What are your prices?'],['📅 Book a visit','I want to book a visit'],['🙋 Talk to a human','Talk to a human']],
+    rules: [
+      { keys:['propert','listing','house','flat','apartment','available'], reply:"We currently have 3 listings live: a 2-bed apartment in DHA (PKR 45,000/mo), a family house in Bahria Town, and a studio near Gulberg. Want details on one of them? Share your name and I'll have an agent send them over.", lead:true },
+      { keys:['price','pricing','cost','how much','rate'], reply:"Apartments start around PKR 35,000/mo and houses from PKR 80,000/mo. Tell me your name and I'll get you an exact quote for your area.", lead:true },
+      { keys:['book','visit','appointment','schedule','tour','viewing'], reply:"Great, I can set that up! First, what's your name?", lead:true },
+      { keys:['human','agent','person','call me','representative'], reply:"Sure, I'll connect you with our team. What's your name?", lead:true },
+    ]
+  },
+  cl: {
+    name: 'Clinic Assistant', icon: '🩺',
+    greeting: "👋 Hello! I can help with appointments, doctor availability, and fees. How can I help today?",
+    quick: [['📅 Book appointment','I want to book an appointment'],['👩‍⚕️ Our doctors','Which doctors are available?'],['💰 Fees','What are the fees?'],['🙋 Talk to a human','Talk to a human']],
+    rules: [
+      { keys:['book','appointment','schedule','visit','checkup'], reply:"I can book that for you. First, what's your name?", lead:true },
+      { keys:['doctor','specialist','dentist','available'], reply:"We have a General Physician, a Dentist and a Dermatologist, available Mon–Sat, 10am–8pm. Share your name and I'll reserve a slot.", lead:true },
+      { keys:['fee','fees','price','pricing','cost','how much','charges'], reply:"Consultations start at PKR 1,500; specialist visits from PKR 3,000. Want me to book one? What's your name?", lead:true },
+      { keys:['human','agent','person','call me','receptionist','representative'], reply:"Sure, our reception team will help. What's your name?", lead:true },
+    ]
+  }
+};
+const SMALLTALK = [
+  { keys:['hi','hello','hey','salam','assalam','assalamualaikum'], reply:"Hello! 👋 How can I help you today?" },
+  { keys:['thank','thanks','shukriya'], reply:"You're welcome! Let me know if there's anything else." },
+];
+const FALLBACK = "Thanks for your message. I can help with the options below, or share your name and a teammate will follow up.";
+
+const chatBody = document.getElementById('chatBody');
+const chatInput = document.getElementById('chatInput');
+const leadsBtn = document.getElementById('leadsBtn');
+let mode = 're', stage = null, current = {}, leads = [], busy = false;
+
+// whole-word matching, so "hi" doesn't match "this" or "which"
+function hit(text, keys) {
+  const words = text.toLowerCase().match(/[a-z0-9']+/g) || [];
+  const joined = ' ' + words.join(' ') + ' ';
+  return keys.some(k => k.length > 4 ? joined.includes(k) : words.includes(k));
+}
+
+function scroll() { chatBody.scrollTop = chatBody.scrollHeight; }
+function addMsg(text, who, extra) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + who + (extra ? ' ' + extra : '');
+  d.textContent = text;
+  chatBody.appendChild(d); scroll();
+}
+function addQuick() {
+  const q = document.createElement('div'); q.className = 'qr'; q.id = 'qr';
+  BOTS[mode].quick.forEach(([label, msg]) => {
+    const b = document.createElement('button'); b.textContent = label;
+    b.addEventListener('click', () => send(msg)); q.appendChild(b);
+  });
+  chatBody.appendChild(q); scroll();
+}
+function clearQuick() { const q = document.getElementById('qr'); if (q) q.remove(); }
+function typing(on) {
+  const old = document.getElementById('typing'); if (old) old.remove();
+  if (!on) return;
+  const t = document.createElement('div'); t.className = 'typing'; t.id = 'typing';
+  t.innerHTML = '<span></span><span></span><span></span>';
+  chatBody.appendChild(t); scroll();
+}
+
+function reset() {
+  chatBody.innerHTML = ''; stage = null; current = {}; busy = false;
+  const b = BOTS[mode];
+  document.getElementById('botName').textContent = b.name;
+  document.getElementById('avatar').textContent = b.icon;
+  addMsg(b.greeting, 'bot'); addQuick();
+}
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('modeRE').setAttribute('aria-pressed', m === 're');
+  document.getElementById('modeCL').setAttribute('aria-pressed', m === 'cl');
+  reset();
+}
+
+function reply(text) {
+  const t = text.trim();
+  if (stage === 'name') {
+    current.name = t; stage = 'phone';
+    return [`Thanks, ${t}! What's your phone number or WhatsApp, so we can follow up?`];
+  }
+  if (stage === 'phone') {
+    if (!/\d{7,}/.test(t.replace(/[\s\-+()]/g, ''))) {
+      return ["That doesn't look like a valid number. Please enter your phone or WhatsApp number, including digits only or a + prefix."];
+    }
+    current.phone = t; stage = null;
+    leads.push({ ...current, topic: current.topic, mode, time: new Date().toLocaleString() });
+    leadsBtn.textContent = 'Leads: ' + leads.length;
+    const done = `You're all set ✅ Our team will contact ${current.name} at ${current.phone} within 24 hours. Anything else I can help with?`;
+    current = {};
+    return [done, 'lead'];
+  }
+  for (const r of BOTS[mode].rules) {
+    if (hit(t, r.keys)) { if (r.lead) { stage = 'name'; current = { topic: t }; } return [r.reply]; }
+  }
+  for (const r of SMALLTALK) if (hit(t, r.keys)) return [r.reply];
+  return [FALLBACK, 'quick'];
+}
+
+function send(text) {
+  if (!text.trim() || busy) return;
+  busy = true;
+  addMsg(text, 'user'); chatInput.value = ''; clearQuick(); typing(true);
+  setTimeout(() => {
+    typing(false);
+    const [msg, flag] = reply(text);
+    addMsg(msg, 'bot', flag === 'lead' ? 'lead' : '');
+    if (flag === 'quick') addQuick();
+    busy = false; chatInput.focus();
+  }, 600 + Math.random() * 400);
+}
+
+leadsBtn.addEventListener('click', () => {
+  if (!leads.length) { addMsg('No leads captured yet. Try booking something in the chat.', 'bot'); return; }
+  const l = leads[leads.length - 1];
+  addMsg(`Latest lead: ${l.name}, ${l.phone}. Interested in: "${l.topic}" (${l.mode === 're' ? 'Real estate' : 'Clinic'}). ${leads.length} total this session.`, 'bot', 'lead');
+});
+document.getElementById('chatSend').addEventListener('click', () => send(chatInput.value));
+chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') send(chatInput.value); });
+document.getElementById('modeRE').addEventListener('click', () => setMode('re'));
+document.getElementById('modeCL').addEventListener('click', () => setMode('cl'));
+reset();
+</script>
+</body>
+</html>
